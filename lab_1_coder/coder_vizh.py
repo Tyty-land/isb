@@ -40,7 +40,6 @@ def coder_vizhener(original_text: str, key_word: str, oper_mod: bool) -> str:
     alphabet = [chr(1040 + x) for x in range(0, 32)]
     alphabet.append(" ")
 
-    # Делаем ключ и исходный текст с заглавными буквами и без знаков препинания
     original_text = transformer(original_text)
     key_word = transformer(key_word)
 
@@ -49,14 +48,12 @@ def coder_vizhener(original_text: str, key_word: str, oper_mod: bool) -> str:
 
     writer_files(key_word, "key_word.txt")
 
-    # Создаём строку из ключевых слов для дальнейшего шифрования текста
     key_string = ""
     for i in range(0, int(len(original_text) / len(key_word) + 1)):
         key_string += key_word
     if len(key_string) > len(original_text):
         key_string = key_string[:-(len(key_string) - len(original_text))]
 
-    # Шифруем/Дешифруем сообщение по Виженеру
     coded_text = original_text
     if oper_mod:
         for i in range(0, len(key_string)):
