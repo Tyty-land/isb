@@ -59,7 +59,7 @@ def writer_files(text_for_write: str, name_file: str) -> None:
         if i % 100 == 0 and i != 0:
             text_for_write = text_for_write[:i] + text_for_write[i] + "\n" + text_for_write[i + 1:]
 
-    with open(name_file, "w") as file:
+    with open(name_file, "w", encoding='utf-8') as file:
         file.write(text_for_write)
         print(f"Файл {name_file} создан")
 
@@ -72,7 +72,7 @@ def main() -> None:
     key_word = input("Введите ключ: ")
 
     text_string = ""
-    with open(text_file, "r") as file:
+    with open(text_file, "r", encoding='utf-8') as file:
         text_string = file.read()
         if '\n' in text_string:
             text_string = text_string.replace("\n", "")

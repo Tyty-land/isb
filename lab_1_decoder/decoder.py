@@ -128,10 +128,10 @@ def main() -> None:
             new = input("На что заменяем: ")
             data_list = custom_replace(data_list, cur, new)
         elif switch == 's':
-            with open("key_alpha.txt", "w") as file:
+            with open("key_alpha.txt", "w", encoding='utf-8') as file:
                 file.write("".join(data_list[1][0]))
             print("Ключ сохранён")
-            with open("text_by_key.txt", "w") as file:
+            with open("text_by_key.txt", "w", encoding='utf-8') as file:
                 file.write(change_text(data_list[0]))
             print("Текст сохранён")
             sleep(2)
@@ -140,7 +140,7 @@ def main() -> None:
             if ".txt" not in key_file:
                 key_file = key_file + ".txt"
             key_alpha = []
-            with open(key_file, "r") as file:
+            with open(key_file, "r", encoding='utf-8') as file:
                 key_alpha = list(file.read())
             data_list = alpha_replace(data_list, key_alpha)
             print(data_list[1][0])
