@@ -1,4 +1,12 @@
 def transformer(str_trans: str) -> str:
+    """
+    This function is needed to convert strings to a specific shape.
+    Namely, all characters are uppercase and the string itself is without punctuation marks
+    (the list of characters can be updated).
+    In the future, the strings returned by this function will be used in message encryption/decryption.
+    :param str_trans: the original line
+    :return: str_trans - converted string
+    """
     not_for_coder = [",", "-", ":", ";", ".", "!", "?", "–", "«", "»"]  # Можно дополнять
     for i in not_for_coder:
         if i in str_trans:
@@ -15,6 +23,20 @@ def transformer(str_trans: str) -> str:
 
 
 def coder_vizhener(original_text: str, key_word: str, oper_mod: bool) -> str:
+    """
+    The heart of the program. Here, the Vision encryption is performed directly or the reverse action, depending
+    on the parameter (oper_mod).
+
+    The function is divided into three parts:
+    1) Convert text and keyword into an encryption/decryption-friendly format
+    2) Creating a string from a repeating key as long as the text
+    3) Encryption/Decryption using an offset in the ASCII table
+
+    :param original_text: The initial text for encryption or decryption
+    :param key_word: a keyword or sentence (no more than the text itself)
+    :param oper_mod: mode switch
+    :return: coded_text - Encrypted/Decrypted Text
+    """
     alphabet = [chr(1040 + x) for x in range(0, 32)]
     alphabet.append(" ")
 
@@ -52,6 +74,13 @@ def coder_vizhener(original_text: str, key_word: str, oper_mod: bool) -> str:
 
 
 def writer_files(text_for_write: str, name_file: str) -> None:
+    """
+    The purpose of this function is to save a string to a file in an easy-to-read format.
+    For example, an encrypted text
+    :param text_for_write: the text to save
+    :param name_file: the name of the text file
+    :return: None
+    """
     if ".txt" not in name_file:
         name_file = name_file + ".txt"
 
@@ -65,13 +94,18 @@ def writer_files(text_for_write: str, name_file: str) -> None:
 
 
 def main() -> None:
+    """
+    This function simply implements a simple interface for running other functions that are already directly related
+    to message encoding. After encrypting the text received from the specified file using a key that the user invents
+    himself, the already encrypted text is also saved as a file. The key is saved separately
+    :return: None
+    """
     oper_mod = int(input("Выберите режим работы(1 - шифруем, 0 - дешифруем)> "))
     text_file = input("Введите путь/название файла с текстом: ")
     if ".txt" not in text_file:
         text_file += ".txt"
     key_word = input("Введите ключ: ")
 
-    text_string = ""
     with open(text_file, "r", encoding='utf-8') as file:
         text_string = file.read()
         if '\n' in text_string:
