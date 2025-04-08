@@ -1,6 +1,8 @@
 from typing import List
 from time import sleep
 
+from const_fila import ALPHA_FREQUE_ORIG, KEY_ALPHA_NF, TEXT_BY_KEY_NF, ALPHA_BY_FREQUENCIES
+
 
 def sort_frequencies(data: List[list]) -> List[list]:
     """
@@ -14,12 +16,8 @@ def sort_frequencies(data: List[list]) -> List[list]:
         if data[1][x] < data[1][x + 1]:
             y = x + 1
             while y != 0 and data[1][y - 1] < data[1][y]:
-                tmp_frq = data[1][y]
-                tmp_ltr = data[0][y]
-                data[1][y] = data[1][y - 1]
-                data[0][y] = data[0][y - 1]
-                data[1][y - 1] = tmp_frq
-                data[0][y - 1] = tmp_ltr
+                data[1][y], data[1][y - 1] = data[1][y - 1], data[1][y]
+                data[0][y], data[0][y - 1] = data[0][y - 1], data[0][y]
                 y -= 1
                 if y == 0 or data[1][y - 1] >= data[1][y + 1]:
                     x = y
@@ -37,9 +35,8 @@ def create_frequen_alpha(text: str) -> List[list]:
     :return: sort_frequencies(data) - a list with a list of characters by frequency, as well as a list of frequencies
     """
     data = [[], []]
-    cnt_all_letter = 0
-    for i in range(0, len(text)):
-        cnt_all_letter += 1
+    cnt_all_letter = len(text)
+    for i in range(0, cnt_all_letter):
         if text[i] not in data[0]:
             data[0].append(text[i])
             data[1].append(1)
@@ -130,7 +127,7 @@ def change_text(text: str) -> str:
     return text
 
 
-def print_al_fr(data: List[list], cnt_in_line: int) -> None:
+def print_al_fr(data: List[list], cnt_in_line: int) -> str:
     """
     The helper function.
     It is needed to correctly display the current alphabet with the frequencies of each letter in it.
@@ -140,10 +137,29 @@ def print_al_fr(data: List[list], cnt_in_line: int) -> None:
     """
     for_print = ['\"' + data[0][x] + '\" = ' + str(data[1][x]) for x in range(len(data[0]))]
     for i in range(len(for_print)):
-        if (i+1) % cnt_in_line == 0 and i != 0:
+        if (i+1) % cnt_in_line == 0:
             for_print[i] = for_print[i] + "\n"
-    print(" ".join(for_print).replace("\n ", "\n"))
+    return " ".join(for_print).replace("\n ", "\n")
 
+def reader_file(name_file: str) -> str:
+    try:
+        if ".txt" not in name_file:
+            name_file += ".txt"
+        with open(name_file, "r", encoding='utf-8') as file:
+            text_file = file.read()
+        return text_file
+    except FileNotFoundError:
+        raise FileNotFoundError(f" [!] - Файл {name_file} не найден")
+
+def writer_file(name_file: str, text_for_file: str) -> None:
+    try:
+        if ".txt" not in name_file:
+            name_file += ".txt"
+        with open(name_file, "w", encoding='utf-8') as file:
+            file.write(text_for_file)
+        print(f"Файл с именем {name_file} сохранён")
+    except Exception as ex:
+        raise Exception(f" [!] - Какая-то фигня, проверь : {ex}")
 
 def main() -> None:
     """
@@ -151,59 +167,48 @@ def main() -> None:
     The interface itself is cyclical.
     :return: None
     """
-    coded_text_file = input("Введите имя/путь файла с зашифрованным сообщением: ")
-    if ".txt" not in coded_text_file:
-        coded_text_file += ".txt"
-    with open(coded_text_file, "r", encoding='utf-8') as file:
-        coded_text = file.read()
-        if "\n" in coded_text:
-            coded_text = coded_text.replace("\n", "")
+    try:
+        coded_text_file = input("Введите имя/путь файла с зашифрованным сообщением: ")
+        coded_text = reader_file(coded_text_file).replace("\n", "")
 
-    alpha_freque_orig = [' ', 'О', 'И', 'Е', 'А', 'Н', 'Т', 'С', 'Р', 'В', 'М', 'Л',
-                         'Д', 'Я', 'К', 'П', 'З', 'Ы', 'Ь', 'У', 'Ч', 'Ж', 'Г',
-                         'Х', 'Ф', 'Й', 'Ю', 'Б', 'Ц', 'Ш', 'Щ', 'Э', 'Ъ']
-    data_list = [coded_text, create_frequen_alpha(coded_text)]
+        data_list = [coded_text, create_frequen_alpha(coded_text)]
 
-    switch = ""
-    while switch != "0":
-        print("Текущий текст: ")
-        print("")
-        print(change_text(data_list[0]))
-        print("")
-        print("Текущий алфавит: ")
-        print("")
-        print_al_fr(data_list[1], 4)
-        print("_______________Меню_______________")
-        print("[f] - Применить частотную замену")
-        print("[r] - Заменить")
-        print("[s] - Сохранить текущий ключ/текст")
-        print("[k] - Использовать ключ")
-        print("[0] - Выход")
-        print("----------------------------------")
-        switch = input("> ")
-        print("")
-        if switch == 'f':
-            data_list = alpha_replace(data_list, alpha_freque_orig)
-        elif switch == 'r':
-            cur = input("Что заменяем: ")
-            new = input("На что заменяем: ")
-            data_list = custom_replace(data_list, cur, new)
-        elif switch == 's':
-            with open("key_alpha.txt", "w", encoding='utf-8') as file:
-                file.write("".join(data_list[1][0]))
-            print("Ключ сохранён")
-            with open("text_by_key.txt", "w", encoding='utf-8') as file:
-                file.write(change_text(data_list[0]))
-            print("Текст сохранён")
-            sleep(2)
-        elif switch == 'k':
-            key_file = input("Укажите путь до файла с ключом: ")
-            if ".txt" not in key_file:
-                key_file = key_file + ".txt"
-            with open(key_file, "r", encoding='utf-8') as file:
-                key_alpha = list(file.read())
-            data_list = alpha_replace(data_list, key_alpha)
-            print(data_list[1][0])
+        switch = ""
+        while switch != "0":
+            print("Текущий текст: ")
+            print("")
+            print(change_text(data_list[0]))
+            print("")
+            print("Текущий алфавит: ")
+            print("")
+            print(print_al_fr(data_list[1], 4))
+            print("_______________Меню_______________")
+            print("[f] - Применить частотную замену")
+            print("[r] - Заменить")
+            print("[s] - Сохранить текущий ключ/текст")
+            print("[k] - Использовать ключ")
+            print("[0] - Выход")
+            print("----------------------------------")
+            switch = input("> ")
+            print("")
+            if switch == 'f':
+                data_list = alpha_replace(data_list, ALPHA_FREQUE_ORIG)
+            elif switch == 'r':
+                cur = input("Что заменяем: ")
+                new = input("На что заменяем: ")
+                data_list = custom_replace(data_list, cur, new)
+            elif switch == 's':
+                writer_file(KEY_ALPHA_NF, "".join(data_list[1][0]))
+                writer_file(TEXT_BY_KEY_NF, change_text(data_list[0]))
+                writer_file(ALPHA_BY_FREQUENCIES, print_al_fr(data_list[1], 1))
+                sleep(2)
+            elif switch == 'k':
+                key_file = input("Укажите путь до файла с ключом: ")
+                key_alpha = list(reader_file(key_file))
+                data_list = alpha_replace(data_list, key_alpha)
+                print(data_list[1][0])
+    except Exception as ex:
+        print(f"WARNING!!:{ex}")
 
 
 if __name__ == '__main__':

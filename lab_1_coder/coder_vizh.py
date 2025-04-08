@@ -1,3 +1,5 @@
+from const_file import NOT_FOR_CODER, KEY_WORD_NF, CODED_TEXT_NF, DECODED_TEXT_NF
+
 def transformer(str_trans: str) -> str:
     """
     This function is needed to convert strings to a specific shape.
@@ -7,17 +9,10 @@ def transformer(str_trans: str) -> str:
     :param str_trans: the original line
     :return: str_trans - converted string
     """
-    not_for_coder = [",", "-", ":", ";", ".", "!", "?", "–", "«", "»"]  # Можно дополнять
-    for i in not_for_coder:
+    for i in NOT_FOR_CODER:
         if i in str_trans:
             str_trans = str_trans.replace(i, "")
-    for j in range(0, len(str_trans)):
-        if ord(str_trans[j]) > 1071:
-            str_trans = str_trans[:j] + chr(ord(str_trans[j]) - 32) + str_trans[j + 1:]
-        if ord('A') <= ord(str_trans[j]) <= ord('Z'):
-            str_trans = str_trans[:j] + chr(ord(str_trans[j]) - ord('A') + 1040) + str_trans[j + 1:]
-        if ord('a') <= ord(str_trans[j]) <= ord('z'):
-            str_trans = str_trans[:j] + chr(ord(str_trans[j]) - 32 - ord('A') + 1040) + str_trans[j + 1:]
+    str_trans = str_trans.upper()
 
     return str_trans
 
@@ -46,7 +41,8 @@ def coder_vizhener(original_text: str, key_word: str, oper_mod: bool) -> str:
     if len(key_word) > int(len(original_text) / 2):
         key_word = key_word[:int(len(original_text) / 2)]
 
-    writer_files(key_word, "key_word.txt")
+    if oper_mod:
+        writer_files(key_word, KEY_WORD_NF)
 
     key_string = ""
     for i in range(0, int(len(original_text) / len(key_word) + 1)):
@@ -78,16 +74,19 @@ def writer_files(text_for_write: str, name_file: str) -> None:
     :param name_file: the name of the text file
     :return: None
     """
-    if ".txt" not in name_file:
-        name_file = name_file + ".txt"
+    try:
+        if ".txt" not in name_file:
+            name_file = name_file + ".txt"
 
-    for i in range(0, len(text_for_write)):
-        if i % 100 == 0 and i != 0:
-            text_for_write = text_for_write[:i] + text_for_write[i] + "\n" + text_for_write[i + 1:]
+        for i in range(0, len(text_for_write)):
+            if i % 100 == 0 and i != 0:
+                text_for_write = text_for_write[:i] + text_for_write[i] + "\n" + text_for_write[i + 1:]
 
-    with open(name_file, "w", encoding='utf-8') as file:
-        file.write(text_for_write)
-        print(f"Файл {name_file} создан")
+        with open(name_file, "w", encoding='utf-8') as file:
+            file.write(text_for_write)
+            print(f"Файл {name_file} создан")
+    except Exception as ex:
+        raise Exception(f" [!] - Какая-то фигня, проверь : {ex}")
 
 
 def main() -> None:
@@ -97,22 +96,25 @@ def main() -> None:
     himself, the already encrypted text is also saved as a file. The key is saved separately
     :return: None
     """
-    oper_mod = int(input("Выберите режим работы(1 - шифруем, 0 - дешифруем)> "))
-    text_file = input("Введите путь/название файла с текстом: ")
-    if ".txt" not in text_file:
-        text_file += ".txt"
-    key_word = input("Введите ключ: ")
+    try:
+        oper_mod = int(input("Выберите режим работы(1 - шифруем, 0 - дешифруем)> "))
+        text_file = input("Введите путь/название файла с текстом: ")
+        if ".txt" not in text_file:
+            text_file += ".txt"
+        key_word = input("Введите ключ: ")
 
-    with open(text_file, "r", encoding='utf-8') as file:
-        text_string = file.read()
-        if '\n' in text_string:
-            text_string = text_string.replace("\n", "")
+        with open(text_file, "r", encoding='utf-8') as file:
+            text_string = file.read()
+            if '\n' in text_string:
+                text_string = text_string.replace("\n", "")
 
-    print(text_string)
-    name_res_file = "decoded_text"
-    if oper_mod:
-        name_res_file = "coded_text"
-    writer_files(coder_vizhener(text_string, key_word, oper_mod), name_res_file)
+        print(text_string)
+        name_res_file = DECODED_TEXT_NF
+        if oper_mod:
+            name_res_file = CODED_TEXT_NF
+        writer_files(coder_vizhener(text_string, key_word, oper_mod), name_res_file)
+    except Exception as ex:
+        print(f"WARNING!!! : {ex}")
 
 
 if __name__ == '__main__':
