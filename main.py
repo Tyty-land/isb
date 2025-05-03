@@ -41,32 +41,35 @@ def long_bit_test(data: str) -> float:
     """
     The test is for the longest sequence in the sequence of zeros and ones block. The third NIST test
     :param data: a sequence of zeros and ones
-    :return gammaincc(1.5, x_2/2): incomplete gamma function
+    :return 1 - gammaincc(1.5, x_2/2): gammaincс(a,x) is a regularized upper incomplete gamma function.
+     1 - gammaincс(a, x) lower incomplete gamma function. That's what we need.
     """
     m = 8
     v_all = [0, 0, 0, 0]
     p_all = [0.2148, 0.3672, 0.2305, 0.1875]
-    for i in range(0, len(data), m):
+    i = 0
+    while i < len(data):
         max_sequence_bit = 0
-        for j in range(i, i+m):
+        j = i
+        while j < i+m:
             tmp_max = 0
-            while data[j] == '1' and j < i+m:
+            while j < i+m and data[j] == '1':
                 tmp_max += 1
-                if j < i + m - 1:
-                    j = j+1
-                else:
-                    break
+                j += 1
             if max_sequence_bit <= tmp_max:
                 max_sequence_bit = tmp_max
+            j += 1
+
         v_all[0] = v_all[0] + 1 if max_sequence_bit <= 1 else v_all[0]
         v_all[1] = v_all[1] + 1 if max_sequence_bit == 2 else v_all[1]
         v_all[2] = v_all[2] + 1 if max_sequence_bit == 3 else v_all[2]
         v_all[3] = v_all[3] + 1 if max_sequence_bit >= 4 else v_all[3]
+        i += m
     x_2 = 0
     for i in range(0, 4):
         x_2 += ((v_all[i] - 16*p_all[i])**2) / 16*p_all[i]
 
-    return gammaincc(1.5, x_2/2)
+    return 1 - gammaincc(1.5, x_2/2)
 
 
 def main() -> None:
