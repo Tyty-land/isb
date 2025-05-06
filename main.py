@@ -67,9 +67,9 @@ def long_bit_test(data: str) -> float:
         i += m
     x_2 = 0
     for i in range(0, 4):
-        x_2 += ((v_all[i] - 16*p_all[i])**2) / 16*p_all[i]
+        x_2 += ((v_all[i] - 16*p_all[i])**2) / (16*p_all[i])
 
-    return 1 - gammaincc(1.5, x_2/2)
+    return gammaincc(1.5, x_2/2)
 
 
 def main() -> None:
