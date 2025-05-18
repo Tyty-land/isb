@@ -1,0 +1,6 @@
+{
+"initial_file": "D:\\text.txt",
+ "secret_key": "D:\\close_key.pem",
+ "symmetric_key": "D:\\symmetric_key.txt",
+ "encryption_path": "D:\\"
+}
