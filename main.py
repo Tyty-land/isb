@@ -1,14 +1,19 @@
 import json
 import os
 import argparse
+import warnings
 
+from cryptography.utils import CryptographyDeprecationWarning
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, modes
-from cryptography.hazmat.primitives.ciphers.algorithms import TripleDES
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=CryptographyDeprecationWarning)
+    from cryptography.hazmat.primitives.ciphers.algorithms import TripleDES
 
 
 def name_file_crt(path: str, name_file: str) -> str:
@@ -47,9 +52,9 @@ def generation(args_f: list) -> None:
         path_cl = name_file_crt(args_f[2], "close_key.pem")
 
         c_sym_key = open_key.encrypt(sym_key,
-                                  asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
-                                                    algorithm=hashes.SHA256(),
-                                                    label=None))
+                                     asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
+                                                       algorithm=hashes.SHA256(),
+                                                       label=None))
         with open(path_sym, "wb") as sym_out:
             sym_out.write(c_sym_key)
 
@@ -62,6 +67,7 @@ def generation(args_f: list) -> None:
                                                     encryption_algorithm=serialization.NoEncryption()))
     except Exception as ex:
         raise Exception(f" [!] - Какая-то фигня, проверь : {ex}")
+
 
 def encry_decry(args_f: list, oper: bool) -> None:
     """
@@ -79,7 +85,7 @@ def encry_decry(args_f: list, oper: bool) -> None:
             c_sym_key = sym_in.read()
         sym_key = close_key.decrypt(c_sym_key,
                                     asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
-                                    algorithm=hashes.SHA256(), label=None))
+                                                      algorithm=hashes.SHA256(), label=None))
         if not oper:
             with open("iv.txt", "rb") as iv_f:
                 iv = iv_f.read()
@@ -126,11 +132,11 @@ def main() -> None:
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument('-gen', '--generation', nargs=4, metavar=('path_sym', 'path_op', 'path_cl', 'byte'),
                            help='Запускает режим генерации ключей')
-        group.add_argument('-enc', '--encryption', nargs=4, metavar=('path_text', 'path_cl', 'path_sym', 'path_en_text'),
-                           help='Запускает режим шифрования')
+        group.add_argument('-enc', '--encryption', nargs=4, metavar=('path_text', 'path_cl', 'path_sym', 'path_en_text')
+                           , help='Запускает режим шифрования')
         group.add_argument('-enc_j', '--encryption_json', help='Запускает режим шифрования(пути из file.json)')
-        group.add_argument('-dec', '--decryption', nargs=4, metavar=('path_en_text', 'path_cl', 'path_sym', 'path_text'),
-                           help='Запускает режим дешифрования')
+        group.add_argument('-dec', '--decryption', nargs=4, metavar=('path_en_text', 'path_cl', 'path_sym', 'path_text')
+                           , help='Запускает режим дешифрования')
         group.add_argument('-dec_j', '--decryption_json', help='Запускает режим дешифрования(пути из file.json)')
 
         args = parser.parse_args()
@@ -141,10 +147,13 @@ def main() -> None:
             elif int(args.generation[3]) > 24:
                 args.generation[3] = '24'
             generation(args.generation)
+            print("Генерация ключей успешно выполнена(все ключи сохранены по своим путям)")
         elif args.encryption is not None:
             encry_decry(args.encryption, True)
+            print("Шифрование текста выполнено успешно(сохранён по заданному пути)")
         elif args.decryption is not None:
             encry_decry(args.decryption, False)
+            print("Дешифрование текста выполнено успешно(сохранён по заданному пути)")
         elif args.encryption_json is not None:
             with open(args.encryption_json, "r") as js_file:
                 data_js = json.load(js_file)
@@ -152,6 +161,7 @@ def main() -> None:
                          data_js['secret_key'],
                          data_js['symmetric_key'],
                          data_js['encryption_path']], True)
+            print("Шифрование текста выполнено успешно(сохранён по заданному в .json пути)")
         elif args.decryption_json is not None:
             with open(args.decryption_json, "r") as js_file:
                 data_js = json.load(js_file)
@@ -159,6 +169,7 @@ def main() -> None:
                          data_js['secret_key'],
                          data_js['symmetric_key'],
                          data_js['decryption_path']], False)
+            print("Дешифрование текста выполнено успешно(сохранён по заданному в .json пути)")
     except Exception as ex:
         print(f"WARNING!!:{ex}")
 
