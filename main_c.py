@@ -4,6 +4,7 @@ import argparse
 from gen_class import GeneratorKeys
 from enc_class import CryptorText
 from dec_class import DecrytorText
+from file_manager import FileManager
 
 
 def main() -> None:
@@ -26,6 +27,7 @@ def main() -> None:
         group.add_argument('-dec_j', '--decryption_json', help='Запускает режим дешифрования(пути из file.json)')
 
         args = parser.parse_args()
+        f_man = FileManager()
 
         if args.generation is not None:
             if int(args.generation[3]) < 16:
@@ -44,8 +46,7 @@ def main() -> None:
             decry.decryption()
             print("Дешифрование текста выполнено успешно(сохранён по заданному пути)")
         elif args.encryption_json is not None:
-            with open(args.encryption_json, "r") as js_file:
-                data_js = json.load(js_file)
+            data_js = f_man.read(args.encryption_json)
             encry = CryptorText([data_js['initial_file'],
                                  data_js['secret_key'],
                                  data_js['symmetric_key'],
@@ -53,8 +54,7 @@ def main() -> None:
             encry.encryption()
             print("Шифрование текста выполнено успешно(сохранён по заданному в .json пути)")
         elif args.decryption_json is not None:
-            with open(args.decryption_json, "r") as js_file:
-                data_js = json.load(js_file)
+            data_js = f_man.read(args.decryption_json)
             decry = DecrytorText([data_js['encryption_file'],
                                   data_js['secret_key'],
                                   data_js['symmetric_key'],
